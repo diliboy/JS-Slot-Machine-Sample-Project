@@ -1,0 +1,45 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build output
+dist/
+build/
+out/
+.cache/
+.next/          # for Next.js
+public/         # Next.js 'public' if rebuilt
+
+# Testing / coverage
+coverage/
+.nyc_output/
+
+# Editor directories and files
+.vscode/
+*.sublime-*
+.idea/
+*.sw?        # swap files
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Miscellaneous
+*.tgz
+*.seed
+.pids
+*.pid.lock
+*.eslintcache
+.node_repl_history
