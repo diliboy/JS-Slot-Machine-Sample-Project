@@ -8,8 +8,22 @@
 
 const prompt = require('prompt-sync')();
 
+const ROWS = 3;
+const COLS = 3;
 
+const SYMBOLS_COUNT = {
+    'A':2,
+    'B':4,
+    'C':6,
+    'D':8,
+}
 
+const SYMBOLS_VALUES = {
+    'A': 5,
+    'B': 4,
+    'C': 3,
+    'D': 2,
+}
 
 
 
@@ -35,7 +49,6 @@ const getNumberOfLines = () => {
         if (isNaN(numberOfLines) || numberOfLines <= 0 || numberOfLines > 3) {
             console.log("Invalid number of lines. Please enter a valid number of lines.");
         }else{
-            console.log(`You have entered ${numberOfLines}`);
             return numberOfLines;
         }
     }
@@ -57,6 +70,112 @@ const getBet = (balance, numberOfLines) => {
 }
 
 
-let balance = deposit();
-const numberOfLines = getNumberOfLines();
-const bet = getBet(balance, numberOfLines);
+const spin = () => {
+    const symbols = [];
+
+    // Create an array of symbols based on their counts
+    for (const[symbol,count] of Object.entries(SYMBOLS_COUNT)) {
+        for (let i = 0; i < count; i++) {
+            symbols.push(symbol);
+        }
+    }
+    // Shuffle the symbols to create randomness
+    const reels = [];
+    for (let j = 0; j < COLS; j++) {
+        reels.push([]);
+        const reelSymbols = [...symbols];
+        for(let k= 0; k < ROWS; k++) {
+            const selectedSymbolIndex = Math.floor(Math.random() * reelSymbols.length);
+            const selectedSymbol = reelSymbols[selectedSymbolIndex];
+            reels[j].push(selectedSymbol);
+            reelSymbols.splice(selectedSymbolIndex, 1);
+        }
+    }
+    return reels;
+};
+
+
+const transpose = (reels) => {
+    const transposed = [];
+    for (let i = 0; i < ROWS; i++) {
+        transposed.push([]);
+        for (let j = 0; j < COLS; j++) {
+            transposed[i].push(reels[j][i]);        
+        }
+    }
+    return transposed;
+};
+
+
+const printRows = (rows) => {
+    console.log("-------------------------------------------------");
+    for (const row of rows) {
+        let rowString = "";
+        
+        for (const [index, symbol] of row.entries()) {
+            rowString += symbol;
+            if(index != row.length - 1) {
+                rowString += " | ";
+            }
+        }
+        console.log(rowString);
+        
+    }
+    console.log("-------------------------------------------------");
+}
+
+
+const getWinnings = (rows, bet, numberOfLines) => {
+    let winnings = 0;
+    for(let row = 0; row < numberOfLines; row++) {
+        const symbols = rows[row];
+        let allSame = true;
+        // Check if all symbols in the row are the same
+        for(let i = 1; i < symbols.length; i++) {
+            if(symbols[i] !== symbols[0]) {
+                allSame = false;
+                break;
+            }
+        }
+        if(allSame) {
+            winnings += bet * SYMBOLS_VALUES[symbols[0]];
+        }
+    }
+    return winnings;
+};
+
+
+const game = () => {
+    let balance = deposit();
+    while (true) {
+        console.log(`Your current balance is $${balance.toFixed(2)}`);
+
+        const numberOfLines = getNumberOfLines();
+        const bet = getBet(balance, numberOfLines);
+        balance -= bet * numberOfLines;
+        const reels = spin();
+        const rows = transpose(reels);
+        printRows(rows);
+        const winnings = getWinnings(rows, bet, numberOfLines);
+
+        console.log(`You won $${winnings.toFixed(2)}`);
+        
+        balance += winnings;
+        
+        if (balance <= 0) {
+            console.log("You have run out of money! Game over.");
+            break;
+        }
+
+        console.log(`Your current balance is $${balance.toFixed(2)}`);
+        
+        const playAgain = prompt("Do you want to play again? (y/n): ").toLowerCase();
+        if (playAgain !== 'y') {
+            console.log("Thank you for playing!");
+            break;
+        }
+    }
+}
+
+
+game();
